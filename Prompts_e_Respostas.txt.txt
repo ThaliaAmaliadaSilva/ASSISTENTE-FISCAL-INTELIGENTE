@@ -1,0 +1,202 @@
+Prompt 1:
+Crie um código VBA que leia uma planilha de notas fiscais e identifique divergências entre CFOP e CST, destacando as linhas com erro.
+
+Resposta:
+Sub Verificar_CFOP_CST()
+    Dim ultimaLinha As Long
+    Dim i As Long
+    Dim cfop As String
+    Dim cst As String
+    Dim erros As Long
+    
+    ' Define a planilha ativa
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    
+    ' Define qual coluna está o CFOP e o CST
+    ' (ajuste conforme o layout da sua planilha)
+    Const COL_CFOP As String = "B"
+    Const COL_CST As String = "C"
+    
+    ' Encontra a última linha com dados
+    ultimaLinha = ws.Cells(ws.Rows.Count, COL_CFOP).End(xlUp).Row
+    
+    ' Limpa formatação anterior
+    ws.Range("A2:Z" & ultimaLinha).Interior.ColorIndex = xlNone
+    
+    erros = 0
+    
+    ' Percorre todas as linhas da planilha
+    For i = 2 To ultimaLinha
+        cfop = Trim(ws.Range(COL_CFOP & i).Value)
+        cst = Trim(ws.Range(COL_CST & i).Value)
+        
+        ' Verifica combinações incorretas de CFOP e CST
+        ' (Exemplos abaixo — ajuste conforme sua realidade)
+        If (cfop Like "5*" And cst <> "000" And cst <> "060") Or _
+           (cfop Like "6*" And cst <> "000" And cst <> "010") Or _
+           (cfop Like "1*" And cst <> "070") Or _
+           (cfop Like "2*" And cst <> "030") Then
+           
+            ' Destaca linha com erro em vermelho claro
+            ws.Rows(i).Interior.Color = RGB(255, 153, 153)
+            erros = erros + 1
+        End If
+    Next i
+    
+    ' Exibe mensagem de resumo
+    If erros > 0 Then
+        MsgBox "Foram encontradas " & erros & " linhas com divergências de CFOP e CST.", vbExclamation, "Verificação Concluída"
+    Else
+        MsgBox "Nenhuma divergência de CFOP e CST encontrada!", vbInformation, "Verificação Concluída"
+    End If
+End Sub
+
+
+Prompt 2:
+Adapte o código VBA para gerar um relatório com todas as notas fiscais que possuem alíquotas diferentes das esperadas.
+
+Resposta :
+Sub Relatorio_Divergencias_Aliquota()
+    Dim wsOrigem As Worksheet
+    Dim wsRelatorio As Worksheet
+    Dim ultimaLinha As Long
+    Dim linhaRelatorio As Long
+    Dim i As Long
+    Dim cfop As String
+    Dim cst As String
+    Dim aliqInformada As Double
+    Dim aliqEsperada As Double
+    Dim erros As Long
+    
+    ' Define a planilha de origem (onde estão as notas)
+    Set wsOrigem = ThisWorkbook.Sheets("NotasFiscais")
+    
+    ' Verifica se já existe o relatório; se sim, apaga
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    ThisWorkbook.Sheets("Relatorio_Erros").Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+    
+    ' Cria uma nova planilha de relatório
+    Set wsRelatorio = ThisWorkbook.Sheets.Add
+    wsRelatorio.Name = "Relatorio_Erros"
+    
+    ' Cabeçalhos do relatório
+    wsRelatorio.Range("A1:E1").Value = Array("Linha", "CFOP", "CST", "Alíquota Informada", "Alíquota Esperada")
+    wsRelatorio.Rows(1).Font.Bold = True
+    
+    ' Define colunas conforme o layout da planilha original
+    Const COL_CFOP As String_
+
+Prompt 3:
+Explique como validar CFOPs e CSTs conforme a legislação estadual de Mato Grosso para empresas do regime normal.
+
+Resposta :
+
+Contexto Legal
+
+O CFOP (Código Fiscal de Operações e Prestações) e o CST (Código de Situação Tributária) são definidos conforme:
+
+Convênio S/N de 1970 (ajuste nacional do CFOP);
+Tabela de CFOP – SEFAZ/MT;
+RCP 2022 – Regulamento do ICMS de Mato Grosso (Decreto nº 2.212/2014 e alterações);
+E as Notas Técnicas da EFD ICMS/IPI (Sped Fiscal).
+
+Empresas do regime normal de tributação (Lucro Real ou Presumido) devem destacar o ICMS nas operações e usar o CFOP e CST adequados ao tipo de movimentação de mercadoria e origem do imposto.
+
+
+Estrutura dos Códigos
+
+CFOP (4 dígitos)
+
+O primeiro dígito indica o tipo de operação:
+
+| Dígito inicial | Tipo de operação                         |
+| -------------- | ---------------------------------------- |
+| 1              | Entrada de mercadorias do mesmo estado   |
+| 2              | Entrada de mercadorias de outros estados |
+| 3              | Entrada do exterior                      |
+| 5              | Saída de mercadorias dentro do estado    |
+| 6              | Saída de mercadorias para outro estado   |
+| 7              | Saída para o exterior                    |
+
+Os demais dígitos definem o tipo de operação (venda, devolução, transferência, etc.).
+Exemplo:
+
+5102 – Venda de mercadoria adquirida de terceiros dentro do estado;
+6102 – Venda de mercadoria adquirida de terceiros para fora do estado;
+1202 – Compra para comercialização interestadual.
+
+
+CST (3 dígitos)
+
+Indica a forma de tributação do ICMS para operações com regime normal.
+
+| CST | Descrição                                                       | Situação tributária                                                      
+| 000 | Tributada integralmente                                         | ICMS destacado normalmente                                               |
+| 010 | Tributada e com cobrança por substituição tributária            | ST retido                                                                |
+| 020 | Com redução de base de cálculo                                  | Tributação parcial                                                       |
+| 030 | Isenta ou não tributada e com cobrança do ICMS por substituição | Misto                                                                    |
+| 040 | Isenta                                                          | Sem débito de ICMS                                                       |
+| 041 | Não tributada                                                   | Operações fora do campo de incidência                                    |
+| 060 | ICMS cobrado anteriormente por ST                               | Sem débito no documento                                                  |
+| 070 | Com redução de base de cálculo e cobrança de ICMS por ST        | Redução + ST                                                             |
+| 090 | Outras combinações                                              | Casos específicos (ex.: Simples Nacional emitindo NF para regime normal) |
+
+
+Lógica de Validação (CFOP ↔ CST)
+
+Na prática, a validação serve para garantir coerência entre o tipo de operação e a tributação aplicada.
+
+| Tipo de operação        | CFOP inicial | CSTs mais comuns | Observação                                    |
+| ----------------------- | ------------ | ---------------- | --------------------------------------------- |
+| Venda dentro do estado  | 5            | 000, 060, 070    | CFOP 5102 → CST 000 (ICMS normal) ou 060 (ST) |
+| Venda fora do estado    | 6            | 000, 010         | CFOP 6102 → CST 000 (ICMS normal) ou 010 (ST) |
+| Compra dentro do estado | 1            | 000, 020, 060    | CFOP 1102 → CST 000 (compra tributada)        |
+| Compra de outro estado  | 2            | 000, 030, 060    | CFOP 2102 → CST 000 (ICMS débito e crédito)   |
+| Devoluções              | 1, 2, 5, 6   | 000, 041, 060    | CFOP 5201 ou 1201 → CST 000 ou 060            |
+| Transferências          | 5, 6         | 041, 060         | Sem débito de ICMS, geralmente CST 041        |
+
+
+Aplicação no Assistente Fiscal Inteligente
+
+O seu Assistente Fiscal Inteligente pode validar CFOP e CST da seguinte forma:
+
+1. Ler a planilha de notas fiscais (CFOP, CST, Alíquota, Valor, Tipo de operação);
+2. Comparar cada linha com uma tabela interna de regras**, como a simplificada acima;
+3. Apontar inconsistências, por exemplo:
+
+   CFOP 5102 com CST 041 → erro (venda interna sem débito de ICMS);
+   CFOP 6108 com CST 060 → ok (venda interestadual ST);
+   CFOP 2102 com CST 070 → erro (redução indevida em compra interestadual);
+4. Gerar relatório de divergências, destacando o CFOP, CST e o motivo do erro;
+5. Sugerir correção, ex.:
+
+   “Para CFOP 5102 o CST esperado é 000 (tributação normal).”
+
+
+Exemplo de regra de validação no VBA
+
+Você pode incorporar no código a seguinte lógica:
+
+```vba
+If cfop Like "5*" And cst <> "000" And cst <> "060" Then
+    MsgBox "CFOP " & cfop & " com CST " & cst & " é inconsistente. Verifique tributação interna."
+End If
+```
+
+Ou, em uma planilha de regras:
+
+| CFOP | CST Válido      | Observação                |
+| ---- | --------------- | ------------------------- |
+| 5102 | 000 / 060       | Venda interna             |
+| 6102 | 000 / 010       | Venda interestadual       |
+| 1202 | 000 / 020 / 060 | Compra p/ comercialização |
+| 5201 | 000 / 041       | Devolução                 |
+
+
+CONCLUSÃO
+O Assistente Fiscal Inteligente representa uma solução prática e aplicável para o setor fiscal de escritórios contábeis. A integração entre IA e automação possibilita a redução de erros, economia de tempo, padronização das análises e maior segurança na entrega do SPED Fiscal.  
+Além de otimizar o processo operacional, o projeto demonstra o potencial do uso de tecnologias acessíveis, como ChatGPT e Excel VBA, para resolver gargalos reais e recorrentes da área contábil.

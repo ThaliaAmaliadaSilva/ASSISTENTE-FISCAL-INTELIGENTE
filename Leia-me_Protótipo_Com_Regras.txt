@@ -1,0 +1,21 @@
+Protótipo Assistente Fiscal Inteligente — Arquivos gerados
+
+Arquivos:
+- Assistente_Fiscal_Protótipo_Regras.xlsx  (Planilha com abas: NotasFiscais, Regras_CFOP_CST, Regras_Aliquotas)
+- VBA_Verificar_CFOP_CST.bas  (módulo VBA: Verificar_CFOP_CST)
+- VBA_Relatorio_Divergencias_Aliquota_Com_Regras.bas  (módulo VBA: Relatorio_Divergencias_Aliquota_Com_Regras)
+
+Passo-a-passo para habilitar macros e usar:
+1. Abra Assistente_Fiscal_Protótipo_Regras.xlsx
+2. No Excel: pressione ALT + F11 (Editor VBA)
+3. Arquivo -> Importar arquivo... e importe os dois arquivos .bas
+4. Salve a pasta de trabalho como "Pasta de Trabalho Habilitada para Macro" (.xlsm)
+5. Volte ao Excel e habilite macros quando solicitado.
+6. Execute as macros:
+   - Verificar_CFOP_CST  -> destaca linhas com CFOP x CST inconsistente
+   - Relatorio_Divergencias_Aliquota_Com_Regras -> cria aba 'Relatorio_Erros' com divergências de alíquota
+
+Observações:
+- A aba 'Regras_Aliquotas' já contém exemplos. Você pode editar/expandir as regras conforme necessidade.
+- A macro de relatório procura correspondência exata primeiro (ex.: 5102). Se não encontrar, verifica padrões com curinga (ex.: 5*).
+- Ajuste colunas no código VBA caso seu layout seja diferente.
